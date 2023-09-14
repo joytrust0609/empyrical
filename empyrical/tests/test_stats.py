@@ -183,7 +183,7 @@ class TestStats(BaseTestCase):
         )
         for i in range(returns.size):
             assert_almost_equal(
-                cum_returns[i],
+                cum_returns.iloc[i] if isinstance(cum_returns, pd.Series) else cum_returns[i],
                 expected[i],
                 4)
 
@@ -191,7 +191,7 @@ class TestStats(BaseTestCase):
 
     @parameterized.expand([
         (empty_returns, 0, np.nan),
-        (one_return, 0, one_return[0]),
+        (one_return, 0, one_return.iloc[0]),
         (mixed_returns, 0, 0.03893),
         (mixed_returns, 100, 103.89310),
         (negative_returns, 0, -0.36590)
@@ -488,8 +488,8 @@ class TestStats(BaseTestCase):
         else:
             for i in range(downside_risk.size):
                 assert_almost_equal(
-                    downside_risk[i],
-                    expected[i],
+                    downside_risk.iloc[i] if isinstance(downside_risk, pd.Series) else downside_risk[i],
+                    expected.iloc[i],
                     DECIMAL_PLACES)
 
     # As a higher percentage of returns are below the required return,
@@ -584,7 +584,7 @@ class TestStats(BaseTestCase):
             for i in range(sortino_ratio.size):
                 assert_almost_equal(
                     sortino_ratio[i],
-                    expected[i],
+                    expected.iloc[i],
                     DECIMAL_PLACES)
 
     # A large Sortino ratio indicates there is a low probability of a large
@@ -768,8 +768,15 @@ class TestStats(BaseTestCase):
             returns_arr = returns.values
             benchmark_arr = benchmark.values
             mask = ~np.isnan(returns_arr) & ~np.isnan(benchmark_arr)
-            slope, intercept, _, _, _ = stats.linregress(benchmark_arr[mask],
-                                                         returns_arr[mask])
+            try:
+                slope, intercept, _, _, _ = stats.linregress(benchmark_arr[mask],
+                                                             returns_arr[mask])
+            except ValueError as e:
+                # pre-scipy 1.8, linregress returned nan if benchmark was flat
+                # but now raises ValueError
+                if "all x values are identical" not in str(e):
+                    raise
+                slope, intercept = np.nan, np.nan
 
             assert_almost_equal(
                 observed,
@@ -917,8 +924,15 @@ class TestStats(BaseTestCase):
             returns_arr = returns.values
             benchmark_arr = benchmark.values
             mask = ~np.isnan(returns_arr) & ~np.isnan(benchmark_arr)
-            slope, intercept, _, _, _ = stats.linregress(benchmark_arr[mask],
-                                                         returns_arr[mask])
+            try:
+                slope, intercept, _, _, _ = stats.linregress(benchmark_arr[mask],
+                                                             returns_arr[mask])
+            except ValueError as e:
+                # pre-scipy 1.8, linregress returned nan if benchmark was flat
+                # but now raises ValueError
+                if "all x values are identical" not in str(e):
+                    raise
+                slope, intercept = np.nan, np.nan
 
             assert_almost_equal(
                 observed,

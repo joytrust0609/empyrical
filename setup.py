@@ -50,29 +50,6 @@ classifiers = [
 ]
 
 
-test_reqs = [
-    "nose>=1.3.7",
-    "parameterized>=0.6.1"
-]
-
-
-requirements = [
-    'numpy>=1.9.2',
-    'pandas>=0.16.1',
-    'scipy>=0.15.1',
-    'six',
-    "pandas-datareader>=0.2"
-]
-
-extras_requirements = {
-    "dev": [
-        "nose==1.3.7",
-        "parameterized==0.6.1",
-        "flake8==2.5.1"
-    ]
-}
-
-
 if __name__ == "__main__":
     setup(
         name=DISTNAME,
@@ -86,8 +63,4 @@ if __name__ == "__main__":
         long_description=LONG_DESCRIPTION,
         packages=["empyrical", "empyrical.tests"],
         classifiers=classifiers,
-        install_requires=requirements,
-        extras_require=extras_requirements,
-        tests_require=test_reqs,
-        test_suite="nose.collector"
-    )
+)
